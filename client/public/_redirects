@@ -1,0 +1,4 @@
+# SPA fallback so deep links such as /login work on static hosting.
+# `npm run build:netlify` overwrites this file in client/dist and prepends
+# /api/* and /uploads/* proxy rules when API_ORIGIN is set.
+/*    /index.html   200

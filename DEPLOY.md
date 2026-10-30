@@ -85,7 +85,8 @@ Netlify entirely — the app works at `https://api-host/`.
    cross-origin instead of using the proxy (then also set `CORS_ORIGINS` and
    `CROSS_SITE_COOKIES=1` on the API — see "Direct API mode" below).
 4. Deploy. `npm run build:netlify` builds the SPA and writes
-   `client/dist/_redirects`:
+   `client/dist/_redirects` (plain `npm run build` also emits it, from
+   `client/public/_redirects`, but only with the SPA fallback rule):
 
    ```
    /api/*      https://school-api.onrender.com/api/:splat      200
@@ -175,7 +176,7 @@ browsing; the proxy mode avoids this entirely and is the recommended setup.
 | Symptom | Cause | Fix |
 |---|---|---|
 | `404` on `/api/...` right after deploy | `API_ORIGIN` missing during build | Set it, trigger a new deploy, confirm `_redirects` in the deploy log |
-| Deep link shows Netlify 404 | `_redirects` absent | Ensure `npm run build:netlify` ran (not `vite build` alone) |
+| Deep link shows Netlify 404 | `_redirects` absent from the deploy | `client/public/_redirects` ships the SPA fallback for plain builds; use `npm run build:netlify` when you also need the `/api` proxy rules |
 | Sign-in succeeds then immediately 401 | API on a different origin without cookies | Use proxy mode, or set `CROSS_SITE_COOKIES=1` + `CORS_ORIGINS` |
 | Logos/images broken | `/uploads` not proxied | Keep the generated `/uploads/*` rule |
 | Data disappears after restart | `data/` not on a persistent disk | Mount a volume and point `DATA_DIR` at it |
