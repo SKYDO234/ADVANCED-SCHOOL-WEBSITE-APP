@@ -1,0 +1,32 @@
+# Netlify configuration — static React SPA + reverse proxy to the API host.
+# Documentation: DEPLOY.md
+
+[build]
+  # Install the client's dependencies, build the SPA, then generate _redirects
+  # (API proxy rules come from the API_ORIGIN environment variable).
+  command = "npm --prefix client ci --no-audit --no-fund && npm run build:netlify"
+  publish = "client/dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NPM_FLAGS = "--no-audit --no-fund"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/favicon.svg"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+
+# SPA fallback + API proxy are written to client/dist/_redirects at build time so
+# that the API origin can be supplied per-environment via API_ORIGIN.
