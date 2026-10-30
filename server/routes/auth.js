@@ -18,6 +18,7 @@ function publicUser(user) {
   return {
     id: user.id,
     email: user.email,
+    username: user.username || null,
     full_name: user.full_name,
     phone: user.phone,
     role: user.role,
@@ -38,17 +39,26 @@ function publicUser(user) {
 }
 
 const loginSchema = z.object({
-  email: z.string().email('Enter a valid email address'),
+  email: z.string().max(160).optional(),
+  identifier: z.string().max(160).optional(),
+  username: z.string().max(60).optional(),
   password: z.string().min(1, 'Password is required'),
   totp: z.string().max(10).optional(),
   schoolCode: z.string().max(24).optional(),
+}).refine((value) => Boolean(value.email || value.identifier || value.username), {
+  message: 'Enter your email or username',
+  path: ['email'],
 });
 
 router.post('/login', validateBody(loginSchema), asyncHandler(async (req, res) => {
-  const { email, password, totp, schoolCode } = req.data;
-  const candidates = db
-    .prepare('SELECT * FROM users WHERE lower(email) = lower(?)')
-    .all(email.trim());
+  const { password, totp, schoolCode } = req.data;
+  // Accept `identifier` (preferred), or `email`, or `username` — all may hold
+  // either an email address or a short login name such as `admin`.
+  const email = String(req.data.identifier || req.data.email || req.data.username || '').trim();
+  const isEmail = email.includes('@');
+  const candidates = isEmail
+    ? db.prepare('SELECT * FROM users WHERE lower(email) = lower(?)').all(email)
+    : db.prepare('SELECT * FROM users WHERE lower(username) = lower(?) AND username IS NOT NULL').all(email);
 
   let user = candidates[0];
   if (schoolCode) {
@@ -67,7 +77,7 @@ router.post('/login', validateBody(loginSchema), asyncHandler(async (req, res) =
 
   if (!user) {
     recordAttempt('failed', 'unknown_account');
-    throw new ApiError(401, 'Invalid email or password');
+    throw new ApiError(401, 'Invalid email, username or password');
   }
 
   const school = db.prepare('SELECT * FROM schools WHERE id = ?').get(user.school_id);
@@ -87,7 +97,7 @@ router.post('/login', validateBody(loginSchema), asyncHandler(async (req, res) =
   if (!verifyPassword(password, user.password_hash)) {
     registerFailedLogin(user, policy);
     recordAttempt('failed', 'bad_password');
-    throw new ApiError(401, 'Invalid email or password');
+    throw new ApiError(401, 'Invalid email, username or password');
   }
 
   if (user.two_factor_enabled) {

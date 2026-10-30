@@ -160,8 +160,9 @@ browsing; the proxy mode avoids this entirely and is the recommended setup.
 ## 5. Post-deploy checklist
 
 - `https://your-site.netlify.app/` — public website with hero, news and forms.
-- `https://your-site.netlify.app/login` — sign in with the principal account and
-  land on `/app`.
+- `https://your-site.netlify.app/login` — sign in with `admin` / `admin123`
+  (demo data) or with the principal username/password you chose in the setup
+  wizard (the username defaults to `admin`).
 - Submit the admissions form, then check **Website & CMS → Admissions**.
 - Upload a logo in **Settings → School profile** (files are served through the
   `/uploads` proxy rule).

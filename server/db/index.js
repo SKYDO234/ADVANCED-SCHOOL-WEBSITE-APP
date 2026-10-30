@@ -79,10 +79,23 @@ export const db = {
   file: DB_FILE,
 };
 
+/** Additive migration helper — adds a column to databases created before it existed. */
+function ensureColumn(table, column, definition) {
+  const columns = raw.prepare(`PRAGMA table_info(${table})`).all();
+  if (!columns.some((c) => c.name === column)) {
+    raw.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${definition}`);
+  }
+}
+
 export function migrate() {
   const sql = fs.readFileSync(path.join(__dirname, 'schema.sql'), 'utf8');
   raw.exec(sql);
   raw.exec('CREATE TABLE IF NOT EXISTS _migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL)');
+
+  // Users can sign in with an email address or a short username (e.g. `admin`).
+  ensureColumn('users', 'username', 'TEXT');
+  raw.exec('CREATE UNIQUE INDEX IF NOT EXISTS uq_users_username ON users (school_id, lower(username))');
+
   return db;
 }
 

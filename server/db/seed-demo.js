@@ -65,10 +65,11 @@ function insert(table, row) {
   stmt.run(...Object.values(row));
 }
 
-function createUser({ schoolId, email, password, full_name, role, role_id, phone, department, designation }) {
+function createUser({ schoolId, email, username, password, full_name, role, role_id, phone, department, designation }) {
   const id = newId('usr');
   insert('users', {
-    id, school_id: schoolId, email: email.toLowerCase(), password_hash: hashPassword(password), full_name,
+    id, school_id: schoolId, email: email.toLowerCase(), username: username || null,
+    password_hash: hashPassword(password), full_name,
     phone: phone || null, role, role_id: role_id || null, department: department || null,
     designation: designation || null, status: 'active', must_change_password: 0,
     created_at: at(), updated_at: at(),
@@ -113,6 +114,12 @@ function seed() {
   const principalId = createUser({
     schoolId, email: 'principal@sunrise.edu.in', password: 'Principal@123', full_name: 'Dr. Ananya Sen',
     role: 'principal', role_id: roleIds.principal, phone: '+91 98300 11111', designation: 'Principal',
+  });
+
+  // Built-in super administrator — signs in with `admin` / `admin123`.
+  createUser({
+    schoolId, email: 'admin@sunrise.edu.in', username: 'admin', password: 'admin123', full_name: 'Super Admin',
+    role: 'principal', role_id: roleIds.principal, phone: '+91 98300 00000', designation: 'System Administrator',
   });
 
   // Classes & sections
@@ -798,6 +805,7 @@ console.log(`\n[seed] done in ${((Date.now() - started) / 1000).toFixed(1)}s —
 console.log(`
   Demo logins (password shown in brackets)
   ─────────────────────────────────────────────────────────────
+  Super admin admin                        (admin123)
   Principal   principal@sunrise.edu.in      (Principal@123)
   Teacher     teacher1@sunrise.edu.in       (Teacher@123)
   Staff       accounts@sunrise.edu.in       (Staff@123)

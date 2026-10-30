@@ -52,6 +52,7 @@ const setupSchema = z.object({
   sessionEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
   principalName: z.string().min(2).max(120),
   principalEmail: z.string().email(),
+  principalUsername: z.string().min(3).max(40).regex(/^[a-zA-Z0-9._-]+$/, 'Use letters, numbers, dots, dashes or underscores').optional().default('admin'),
   principalPassword: z.string().min(8).max(200),
   principalPhone: z.string().max(30).optional().default(''),
 });
@@ -78,12 +79,15 @@ const runSetup = tx((data) => {
   });
 
   const userId = newId('usr');
+  const username = (data.principalUsername || 'admin').toLowerCase();
+  const usernameTaken = db.prepare('SELECT id FROM users WHERE school_id = ? AND lower(username) = ?').get(schoolId, username);
   db.prepare(
-    `INSERT INTO users (id, school_id, email, password_hash, full_name, phone, role, role_id, designation, status, created_at, updated_at)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`,
+    `INSERT INTO users (id, school_id, email, username, password_hash, full_name, phone, role, role_id, designation, status, created_at, updated_at)
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)`,
   ).run(
-    userId, schoolId, data.principalEmail.toLowerCase(), hashPassword(data.principalPassword),
-    data.principalName, data.principalPhone, 'principal', roleIds.principal, 'Principal', 'active', at, at,
+    userId, schoolId, data.principalEmail.toLowerCase(), usernameTaken ? null : username,
+    hashPassword(data.principalPassword), data.principalName, data.principalPhone, 'principal',
+    roleIds.principal, 'Principal', 'active', at, at,
   );
 
   setSetting(schoolId, 'theme', 'config', DEFAULT_THEME);

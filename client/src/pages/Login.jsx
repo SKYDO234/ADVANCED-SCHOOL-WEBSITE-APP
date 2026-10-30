@@ -6,6 +6,7 @@ import { Alert, Button, Input, useToast } from '../ui/index.jsx';
 import Icon from '../ui/Icon.jsx';
 
 const DEMO_ACCOUNTS = [
+  { role: 'Super admin', email: 'admin', password: 'admin123' },
   { role: 'Principal', email: 'principal@sunrise.edu.in', password: 'Principal@123' },
   { role: 'Teacher', email: 'teacher1@sunrise.edu.in', password: 'Teacher@123' },
   { role: 'Accounts', email: 'accounts@sunrise.edu.in', password: 'Staff@123' },
@@ -104,11 +105,11 @@ export default function Login() {
 
           <form onSubmit={submit}>
             <Input
-              label="Email address"
-              type="email"
+              label="Email or username"
+              type="text"
               required
               autoComplete="username"
-              placeholder="you@school.edu"
+              placeholder="admin or you@school.edu"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
             />

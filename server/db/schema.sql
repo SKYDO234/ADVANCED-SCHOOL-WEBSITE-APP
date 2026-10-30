@@ -93,6 +93,7 @@ CREATE TABLE IF NOT EXISTS users (
   id                   TEXT PRIMARY KEY,
   school_id            TEXT NOT NULL,
   email                TEXT NOT NULL,
+  username             TEXT,
   password_hash        TEXT NOT NULL,
   full_name            TEXT NOT NULL,
   phone                TEXT,

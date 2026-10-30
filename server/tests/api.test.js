@@ -69,6 +69,14 @@ async function main() {
     if (!principal.permissions.includes('results.finalize')) throw new Error('missing permissions');
   });
 
+  await test('super admin login with username', async () => {
+    const admin = (await asUser('admin', 'admin123')).user;
+    if (admin.role !== 'principal') throw new Error('admin is not a principal');
+    if (admin.username !== 'admin') throw new Error('username not returned on the session');
+    // Restore the principal session used by the remaining tests.
+    principal = (await asUser('principal@sunrise.edu.in', 'Principal@123')).user;
+  });
+
   await test('bootstrap payload', async () => {
     const { data } = await call('GET', '/meta/bootstrap');
     if (!data.academic.classes.length) throw new Error('no classes');

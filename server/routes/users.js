@@ -53,6 +53,7 @@ router.get('/:id', requirePermission('settings.users', 'employees.view'), asyncH
 const createSchema = z.object({
   full_name: z.string().min(2).max(120),
   email: z.string().email(),
+  username: z.string().min(3).max(40).regex(/^[a-zA-Z0-9._-]+$/, 'Use letters, numbers, dots, dashes or underscores').optional(),
   password: z.string().min(6).max(200).optional(),
   phone: z.string().max(30).optional().default(''),
   role: z.enum(['principal', 'teacher', 'staff', 'student', 'parent']),
@@ -67,6 +68,11 @@ router.post('/', requirePermission('settings.users'), validateBody(createSchema)
   if (data.role === 'principal' && req.user.role !== 'principal') throw forbidden('Only the principal can create principal accounts');
   const exists = db.prepare('SELECT id FROM users WHERE school_id = ? AND lower(email) = lower(?)').get(req.user.school_id, data.email);
   if (exists) throw conflict('A user with this email already exists');
+  const username = data.username ? data.username.toLowerCase() : null;
+  if (username) {
+    const taken = db.prepare('SELECT id FROM users WHERE school_id = ? AND lower(username) = ?').get(req.user.school_id, username);
+    if (taken) throw conflict('This username is already in use');
+  }
 
   const policy = passwordPolicy(req.user.school_id);
   const password = data.password || generatePassword(12);
@@ -82,11 +88,11 @@ router.post('/', requirePermission('settings.users'), validateBody(createSchema)
   const id = newId('usr');
   const at = nowIso();
   db.prepare(
-    `INSERT INTO users (id, school_id, email, password_hash, full_name, phone, role, role_id, department, designation,
+    `INSERT INTO users (id, school_id, email, username, password_hash, full_name, phone, role, role_id, department, designation,
       status, must_change_password, created_by, created_at, updated_at)
-     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
+     VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`,
   ).run(
-    id, req.user.school_id, data.email.toLowerCase(), hashPassword(password), data.full_name, data.phone,
+    id, req.user.school_id, data.email.toLowerCase(), username, hashPassword(password), data.full_name, data.phone,
     data.role, roleId, data.department || null, data.designation || null, 'active', data.password ? 0 : 1,
     req.user.id, at, at,
   );

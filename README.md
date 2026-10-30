@@ -57,14 +57,24 @@ Netlify + API deployment walkthrough, environment variables and troubleshooting.
 
 ### Demo accounts
 
-| Role      | Email                      | Password       |
-|-----------|----------------------------|----------------|
-| Principal | `principal@sunrise.edu.in` | `Principal@123`|
+| Role        | Login                      | Password       |
+|-------------|----------------------------|----------------|
+| Super admin | `admin`                    | `admin123`     |
+| Principal   | `principal@sunrise.edu.in` | `Principal@123`|
 | Teacher   | `teacher1@sunrise.edu.in`  | `Teacher@123`  |
 | Accounts  | `accounts@sunrise.edu.in`  | `Staff@123`    |
 | Exams     | `exams@sunrise.edu.in`     | `Staff@123`    |
 | Parent    | `parent1@example.com`      | `Parent@123`   |
 | Student   | `student25@example.com`    | `Student@123`  |
+
+These credentials are for local demo use — change them (Settings → Security, or
+Users & roles) before exposing the app publicly.
+
+Sign in with **either a username or an email address**. The seeded super admin
+(`admin` / `admin123`) has the `principal` role, which bypasses every permission
+check. On a fresh install the setup wizard asks for the first principal's login
+username, defaulting to `admin`; administrators can also give other users a
+username when creating their account.
 
 Staff sign in at `/login` and land on `/app`; students and parents land on the
 family portal at `/portal`.

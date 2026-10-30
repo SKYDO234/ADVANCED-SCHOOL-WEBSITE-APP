@@ -109,7 +109,7 @@ export function AppProvider({ children }) {
   }, [school, publicSite]);
 
   const login = useCallback(async (email, password, totp, schoolCode) => {
-    const result = await post('/auth/login', { email, password, ...(totp ? { totp } : {}), ...(schoolCode ? { schoolCode } : {}) });
+    const result = await post('/auth/login', { identifier: email, email, password, ...(totp ? { totp } : {}), ...(schoolCode ? { schoolCode } : {}) });
     await loadBootstrap();
     return result;
   }, [loadBootstrap]);

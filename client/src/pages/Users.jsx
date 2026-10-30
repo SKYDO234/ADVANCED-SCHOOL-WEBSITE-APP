@@ -10,19 +10,19 @@ import Icon from '../ui/Icon.jsx';
 
 function CreateUserModal({ open, onClose, onDone, roles }) {
   const toast = useToast();
-  const [form, setForm] = useState({ full_name: '', email: '', role: 'teacher', role_id: '', department: '', designation: '', password: '' });
+  const [form, setForm] = useState({ full_name: '', email: '', username: '', role: 'teacher', role_id: '', department: '', designation: '', password: '' });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [created, setCreated] = useState(null);
 
   useEffect(() => {
-    if (open) { setError(''); setCreated(null); setForm({ full_name: '', email: '', role: 'teacher', role_id: '', department: '', designation: '', password: '' }); }
+    if (open) { setError(''); setCreated(null); setForm({ full_name: '', email: '', username: '', role: 'teacher', role_id: '', department: '', designation: '', password: '' }); }
   }, [open]);
 
   const save = async () => {
     setBusy(true);
     try {
-      const res = await post('/users', { ...form, role_id: form.role_id || null, password: form.password || undefined });
+      const res = await post('/users', { ...form, username: form.username || undefined, role_id: form.role_id || null, password: form.password || undefined });
       setCreated(res);
       toast.success('Account created');
       onDone?.();
@@ -58,7 +58,10 @@ function CreateUserModal({ open, onClose, onDone, roles }) {
     >
       {error ? <div className="mb-2"><Alert tone="danger">{error}</Alert></div> : null}
       <Input label="Full name" required value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
-      <Input label="Email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+      <div className="field-row">
+        <Input label="Email" type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+        <Input label="Username (optional)" placeholder="e.g. priya.sharma" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, '') })} hint="Lets this person sign in without typing an email" />
+      </div>
       <div className="field-row">
         <Select
           label="Role"

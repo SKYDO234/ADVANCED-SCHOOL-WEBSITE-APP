@@ -37,6 +37,7 @@ export default function Setup() {
     sessionEnd: `${year + 1}-03-31`,
     principalName: '',
     principalEmail: '',
+    principalUsername: 'admin',
     principalPassword: '',
     principalPhone: '',
   });
@@ -172,7 +173,10 @@ export default function Setup() {
                 <Input label="Full name" required placeholder="Dr. Anita Rao" value={form.principalName} onChange={(e) => set({ principalName: e.target.value })} />
                 <Input label="Phone" value={form.principalPhone} onChange={(e) => set({ principalPhone: e.target.value })} />
               </div>
-              <Input label="Email" type="email" required placeholder="principal@school.edu" value={form.principalEmail} onChange={(e) => set({ principalEmail: e.target.value })} autoComplete="username" />
+              <div className="field-row">
+                <Input label="Email" type="email" required placeholder="principal@school.edu" value={form.principalEmail} onChange={(e) => set({ principalEmail: e.target.value })} autoComplete="email" />
+                <Input label="Login username" value={form.principalUsername} onChange={(e) => set({ principalUsername: e.target.value.toLowerCase().replace(/[^a-z0-9._-]/g, '') })} hint="Short name for signing in — defaults to admin" autoComplete="username" />
+              </div>
               <Input
                 label="Password"
                 type="password"
