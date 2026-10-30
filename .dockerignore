@@ -1,0 +1,11 @@
+.git
+.gitignore
+node_modules
+client/node_modules
+client/dist
+data
+*.log
+.env
+.DS_Store
+netlify.toml
+DEPLOY.md
